@@ -15,6 +15,49 @@ int count = 0;
 #define Led_2 22
 #define Led_3 21
 #define Led_4 19
+#define Led_5 13
+#define Led_6 12
+#define Led_7 27
+#define Led_8 26
+#define reinicio 33
+
+// se configura timer
+hw_timer_t *timer = NULL;
+
+volatile int sequenceIndex = 0;
+
+// se define función para temporizador
+void IRAM_ATTR Temporizador() {
+
+// Secuencia de estados de los LEDs
+  int sequence[16][4] = {
+    {LOW, LOW, LOW, LOW},
+    {LOW, LOW, LOW, HIGH},
+    {LOW, LOW, HIGH, LOW},
+    {LOW, LOW, HIGH, HIGH},
+    {LOW, HIGH, LOW, LOW},
+    {LOW, HIGH, LOW, HIGH},
+    {LOW, HIGH, HIGH, LOW},
+    {LOW, HIGH, HIGH, HIGH},
+    {HIGH, LOW, LOW, LOW},
+    {HIGH, LOW, LOW, HIGH},
+    {HIGH, LOW, HIGH, LOW},
+    {HIGH, LOW, HIGH, HIGH},
+    {HIGH, HIGH, LOW, LOW},
+    {HIGH, HIGH, LOW, HIGH},
+    {HIGH, HIGH, HIGH, LOW},
+    {HIGH, HIGH, HIGH, HIGH}
+  };
+
+// Cambio de estado de los LEDs según el índice actual de la secuencia
+  digitalWrite(Led_5, sequence[sequenceIndex][0]);
+  digitalWrite(Led_6, sequence[sequenceIndex][1]);
+  digitalWrite(Led_7, sequence[sequenceIndex][2]);
+  digitalWrite(Led_8, sequence[sequenceIndex][3]);
+
+  // Incrementa el índice de la secuencia
+  sequenceIndex = (sequenceIndex + 1) % 16;
+}
 
 // Prototipos de funciones
 void mostrarBinario(uint8_t numero);
@@ -60,6 +103,17 @@ void setup() {
   digitalWrite(Led_2,LOW);
   digitalWrite(Led_3,LOW);
   digitalWrite(Led_4,LOW);
+
+  pinMode(Led_5, OUTPUT);
+  pinMode(Led_6, OUTPUT);
+  pinMode(Led_7, OUTPUT);
+  pinMode(Led_8, OUTPUT);
+  pinMode(reinicio, PULLDOWN);
+
+  timer = timerBegin(0, 80, true); // Timer 0, divisor de reloj 80
+  timerAttachInterrupt(timer, &Temporizador, true); // Adjuntar la función de manejo de interrupción
+  timerAlarmWrite(timer, 250000, true); // Interrupción cada 25ms
+  timerAlarmEnable(timer);
 }
 
 // Loop principal
@@ -72,6 +126,8 @@ void loop() {
     MENOS.pressed = false;
     delay(200);
   }
+  if (reinicio == HIGH){
+    sequenceIndex = 0;
 }
 
 // otras funciones
