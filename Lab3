@@ -1,0 +1,83 @@
+// Universidad del Valle
+// Digital 2
+// Ana y Dayrin
+// Contador binario con leds e interrupciones
+
+// Librerías
+#include <Arduino.h>
+#include <stdint.h>
+
+portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+
+// Variables globales
+int count = 0;
+#define Led_1 23
+#define Led_2 22
+#define Led_3 21
+#define Led_4 19
+
+// Prototipos de funciones
+void mostrarBinario(uint8_t numero);
+
+// Se define una estructura para los botones
+struct Button {
+  const uint8_t PIN;
+  bool pressed;
+};
+
+// Se definen los botones
+Button MAS = {4,false};
+Button MENOS = {5,false};
+
+// Se definen las ISR
+void IRAM_ATTR mas_isr() {
+  portENTER_CRITICAL_ISR(&mux);
+    count = (count + 1) % 16;
+    MAS.pressed = true;                             
+    mostrarBinario(count);
+  portEXIT_CRITICAL_ISR(&mux);
+}
+
+void IRAM_ATTR menos_isr() {
+  portENTER_CRITICAL_ISR(&mux);
+    count = (count - 1) % 16;;
+    MENOS.pressed = true;
+    mostrarBinario(count);
+  portEXIT_CRITICAL_ISR(&mux);
+}
+
+// Función de configuración 
+void setup() {
+  pinMode(MAS.PIN, INPUT_PULLDOWN);
+  attachInterrupt(MAS.PIN, mas_isr, RISING);
+  pinMode(MENOS.PIN, INPUT_PULLUP);
+  attachInterrupt(MENOS.PIN, menos_isr, FALLING);
+  pinMode(Led_1, OUTPUT);
+  pinMode(Led_2, OUTPUT);
+  pinMode(Led_3, OUTPUT);
+  pinMode(Led_4, OUTPUT);
+  digitalWrite(Led_1,LOW);
+  digitalWrite(Led_2,LOW);
+  digitalWrite(Led_3,LOW);
+  digitalWrite(Led_4,LOW);
+}
+
+// Loop principal
+void loop() {
+  if (MAS.pressed) {
+    MAS.pressed = false;
+    delay(200);
+  }
+  if (MENOS.pressed) {
+    MENOS.pressed = false;
+    delay(200);
+  }
+}
+
+// otras funciones
+void mostrarBinario(uint8_t numero) {
+  digitalWrite(Led_1, numero & 0x01);
+  digitalWrite(Led_2, (numero >> 1) & 0x01);
+  digitalWrite(Led_3, (numero >> 2) & 0x01);
+  digitalWrite(Led_4, (numero >> 3) & 0x01);
+}
