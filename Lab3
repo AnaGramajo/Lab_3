@@ -19,6 +19,7 @@ int count = 0;
 #define Led_6 12
 #define Led_7 27
 #define Led_8 26
+#define Led_9 2
 #define reinicio 33
 
 // se configura timer
@@ -110,6 +111,9 @@ void setup() {
   pinMode(Led_8, OUTPUT);
   pinMode(reinicio, PULLDOWN);
 
+  pinMode(Led_9, OUTPUT);
+  digitalWrite(Led_9,LOW);
+
   timer = timerBegin(0, 80, true); // Timer 0, divisor de reloj 80
   timerAttachInterrupt(timer, &Temporizador, true); // Adjuntar la función de manejo de interrupción
   timerAlarmWrite(timer, 250000, true); // Interrupción cada 25ms
@@ -128,7 +132,15 @@ void loop() {
   }
   if (reinicio == HIGH){
     sequenceIndex = 0;
-}
+  }
+  if (count == sequenceIndex) {
+    if (digitalRead(Led_9) == LOW) {
+      digitalWrite(Led_9,HIGH);
+    } else {
+      digitalWrite(Led_9,LOW);
+    }
+    timerWrite(timer,0);
+  }
 
 // otras funciones
 void mostrarBinario(uint8_t numero) {
