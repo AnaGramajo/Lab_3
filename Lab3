@@ -139,9 +139,6 @@ void loop() {
     MENOS.pressed = false;
     delay(200);
   }
-  if (reinicio == HIGH){
-    sequenceIndex = 0;
-  }
   // Verifica que ambos contadores sean iguales
   // Debe ser un número distinto en el   ue se detectó que eran iguales la última vez
   // para evitar que se quede en un bucle
